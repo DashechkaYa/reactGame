@@ -28,8 +28,10 @@ function Board({xIsNext, squares, onPlay}) {
   let status;
   if(winner) {
     status = "Winner:" + winner; 
+  } else if (isGameOver(squares)) {
+      status = "Game draw"; 
   } else {
-    status = "Next player:" + (xIsNext ? 'X' : "O");
+      status = "Next player:" + (xIsNext ? 'X' : "O");
   }
 
   return ( 
@@ -58,13 +60,34 @@ function Board({xIsNext, squares, onPlay}) {
 export default function Game() {
   const [xIsNext, setXIsNext] = useState(true);
   const [history, setHistory] = useState([Array(9).fill(null)]);
-  const currentSquares = history[history.length - 1];
-  console.log(currentSquares);
+  const [currentMove, setCurrentMove] = useState(0);     // і це нащо
+  const currentSquares = history[currentMove];
 
   function handlePlay(nextSquares) {
-    setHistory([...history, nextSquares]);
-    setXIsNext(!xIsNext);
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
+    setXIsNext(!xIsNext);                             // не зрозуміла fнащо змінювати true на false
   };
+
+  function jumpTo(nextMove) {
+    setCurrentMove(nextMove);
+    setXIsNext(nextMove % 2 === 0);      // відповіно не ясно це
+  };
+
+  const moves = history.map((squares, move) => {
+    let description;
+    if(move > 0) {
+      description = 'Go to move #' + move;
+    } else {
+      description = 'Go to game start';
+    }
+    return (                          // в підручнику сказано не використовувати інекс як ключ
+      <li key={move}>
+        <button onClick={() => jumpTo(move)}>{description}</button>
+      </li>
+    );
+  });
 
   return (
     <div className="game">
@@ -72,10 +95,14 @@ export default function Game() {
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
       </div>
       <div className="game-board">
-        <ol>{}</ol>
+        <ol>{moves}</ol>
       </div>
     </div>
   )
+};
+
+function isGameOver(squares) {
+  return squares.every(cell => cell);
 };
 
 function calculateWinner(squares) {
