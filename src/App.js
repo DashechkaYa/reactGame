@@ -25,9 +25,9 @@ function Board({xIsNext, squares, onPlay}) {   // якщо головний ко
     onPlay(nextSquares);    // по суті це виконання ф handlePlay в ф Game для оновлення історії гри
   };
 
-  const winner = calculateWinner(squares);
+  const winner = calculateWinner(squares);    // в змінну записується результат ф calculateWinner
   let status;
-  if(winner) {
+  if(winner) {       //  тут визначається чи показати переможця чи ніч'ю чи наступного гравця
     status = "Winner:" + winner; 
   } else if (isGameOver(squares)) {
       status = "Game draw"; 
@@ -59,21 +59,19 @@ function Board({xIsNext, squares, onPlay}) {   // якщо головний ко
 }
 
 export default function Game() {
-  const [xIsNext, setXIsNext] = useState(true);       // цей код задає першого гравця (Х)
   const [history, setHistory] = useState([Array(9).fill(null)]);     // history це масив масивів (кожен вкладений масив це дошка з 9 клітинок з певним станом в певний момет гри; кожен наступний вкладений масив це новий стан гри - після кожного кліку гравців)
   const [currentMove, setCurrentMove] = useState(0);       // currentMove - це індекс останнього (поточного стану гри) елементу масиву
+  const xIsNext = currentMove % 2 === 0;     // цей код задає першого гравця (Х)
   const currentSquares = history[currentMove];       // змінна є посиланням на останній (актуальний стан гри) вкладений масив (дошку з 9 клітинок), по суті history[currentMove] з кожним кліком змінюється
 
   function handlePlay(nextSquares) {       // ф виконується з кожним кліком по дошці (з ф Board). Її параметр - це масив (актуальний стан гри) - за допомогою нього вона оновлює стани (useState) ф Game
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];     // взали в змінну: копія існуючого масиву масивів history + з останній хід (останній вкладений масив) 
     setHistory(nextHistory);     // нові данні з попереднього рядка використовуємо для оновлення історії гри
     setCurrentMove(nextHistory.length - 1);     // оновлюємо данні про останній індекс в історії
-    setXIsNext(!xIsNext);     // тут змінюємо гравця з Х на О і навпаки для наступного ходу
   };
 
   function jumpTo(nextMove) {     // ф виконується з кліком по одній з кнопок (кожна кнопка - повернення на певний хід), що виникають з кожним кліком на дошку; обробник кліку кнопки - в return ф що створює ці кнопки
     setCurrentMove(nextMove);    // тут оновлюється індекс стану currentMove (це стає ніби останнім індексом - так змінюється відображення історії гри)
-    setXIsNext(nextMove % 2 === 0);   // вказує який гравець може далі робити хід
   };
 
   const moves = history.map((squares, move) => {    // moves це масив кнопок, map - ф що створює ці кнопки
@@ -106,8 +104,8 @@ function isGameOver(squares) {
   return squares.every(cell => cell);
 };
 
-function calculateWinner(squares) {
-  const lines = [
+function calculateWinner(squares) {  // ф визначає переможця, її параметр - останій елемент масиву history (поточий стан дошки - всіх клітинок гри)
+  const lines = [       // тут всі можливі комбінації де може бути перемога гравця
     [0, 1, 2],
     [3, 4, 5],
     [6, 7, 8],
@@ -118,9 +116,9 @@ function calculateWinner(squares) {
     [2, 4, 6]
   ];
 
-  for(let i =0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if(squares[a] && squares[a] === squares[b] && squares[b] === squares[c]) {
+  for(let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];           // тут за доп деструктуризиції зберігаємо в 3 змінні всі елементи з кожного вкладеного масиву
+    if(squares[a] && squares[a] === squares[b] && squares[b] === squares[c]) {  // тут ми порівнюємо ці елементи (якщо вони рівні - значить  є переможець)
       return squares[a];
     }
   }
